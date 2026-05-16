@@ -29,7 +29,7 @@ PADDLE_SPD = 7
 
 # AI configs  {spd, offset, error_chance, prediction}
 AI_CFG = {
-    "easy":   dict(spd=3.2, offset=35, err=0.28, pred=0.45),
+    "easy":   dict(spd=2.8, offset=45, err=0.38, pred=0.35),
     "medium": dict(spd=5.0, offset=14, err=0.10, pred=0.78),
     "hard":   dict(spd=7.8, offset=4,  err=0.02, pred=1.00),
 }

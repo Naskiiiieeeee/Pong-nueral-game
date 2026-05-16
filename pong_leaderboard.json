@@ -1,5 +1,35 @@
 [
   {
+    "winner": "NEURAL AI",
+    "p1": 0,
+    "p2": 7,
+    "games": "0\u20132",
+    "mode": "VS AI",
+    "diff": "HARD",
+    "rallies": 224,
+    "date": "May 16 20:33"
+  },
+  {
+    "winner": "NEURAL AI",
+    "p1": 0,
+    "p2": 7,
+    "games": "0\u20132",
+    "mode": "VS AI",
+    "diff": "MEDIUM",
+    "rallies": 12,
+    "date": "May 16 20:28"
+  },
+  {
+    "winner": "NEURAL AI",
+    "p1": 0,
+    "p2": 7,
+    "games": "0\u20132",
+    "mode": "VS AI",
+    "diff": "EASY",
+    "rallies": 11,
+    "date": "May 16 20:26"
+  },
+  {
     "winner": "PLAYER 2",
     "p1": 6,
     "p2": 7,
