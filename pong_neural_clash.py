@@ -294,7 +294,8 @@ class Ball:
         if mode == "pvp":
             self.spd = 5.0
         else:
-            self.spd = {"easy": 4.5, "medium": 5.0, "hard": 6.0}[difficulty]
+            self.spd = {"easy": 4.0, "medium": 6.5, "hard": 9.5}[difficulty]
+        self.spd_cap = {"easy": 9.0, "medium": 13.0, "hard": 18.0}.get(difficulty, 14.0)
         angle = math.radians(random.uniform(-27.5, 27.5))
         direction = random.choice([-1, 1])
         self.dx = math.cos(angle) * self.spd * direction
@@ -328,7 +329,7 @@ class MenuScreen:
         glow = abs(math.sin(self.pulse_t * 1.2))
         col  = (int(0 + glow * 0), int(200 + glow * 55), int(200 + glow * 55))
         self.R.glow_text("PONG", self.R.font_title, col, W // 2, 90, glow_r=max(4, int(glow * 18)))
-        self.R.text("NEURAL CLASH", self.R.font_xs, (0, 130, 130), W // 2, 148)
+        self.R.text("//NEURAL CLASH//", self.R.font_xs, (0, 130, 130), W // 2, 148)
         self.R.text("BEST OF 3 GAMES", self.R.font_xs, GOLD, W // 2, 162)
 
         pygame.draw.line(self.R.screen, (0, 120, 120), (W // 2 - 110, 175), (W // 2 + 110, 175))
@@ -442,7 +443,7 @@ class LeaderboardScreen:
 
 
 # ─────────────────────────────────────────────
-#  GAME-WIN SCREEN
+#  GAME-WIN SCREEN  (between games in a match)
 # ─────────────────────────────────────────────
 class GameWinScreen:
     """Shown after each individual game (not the whole match)."""
@@ -508,7 +509,6 @@ class GameWinScreen:
         """Draw big match-win pips for both sides."""
         cy = 408
         spacing = 28
-        # P1 pips 
         for i in range(WINS_TO_MATCH):
             px = W // 2 - 80 - i * spacing
             filled = (WINS_TO_MATCH - 1 - i) < self.p_wins
@@ -518,7 +518,6 @@ class GameWinScreen:
                 pygame.draw.polygon(self.R.screen, c, pts)
             else:
                 pygame.draw.polygon(self.R.screen, c, pts, 1)
-        # P2 pips 
         for i in range(WINS_TO_MATCH):
             px = W // 2 + 80 + i * spacing
             filled = i < self.a_wins
@@ -629,7 +628,6 @@ class Game:
         self.a_wins     = 0
         self.total_rallies = 0
         self.ai_bonus      = 0.0
-
         self.p_score = 0
         self.a_score = 0
         self.rallies = 0
@@ -795,7 +793,7 @@ class Game:
                 and pl.y <= b.y <= pl.y + PH):
             b.x = pl.x + PW + b.r
             hp = (b.y - (pl.y + PH / 2)) / (PH / 2)
-            b.spd = min(b.spd + 0.15, 14)
+            b.spd = min(b.spd + 0.15, b.spd_cap)
             angle = math.radians(hp * 60)
             b.dx = math.cos(angle) * b.spd
             b.dy = math.sin(angle) * b.spd
@@ -813,7 +811,7 @@ class Game:
                 and ai.y <= b.y <= ai.y + PH):
             b.x = ai.x - b.r
             hp = (b.y - (ai.y + PH / 2)) / (PH / 2)
-            b.spd = min(b.spd + 0.15, 14)
+            b.spd = min(b.spd + 0.15, b.spd_cap)
             angle = math.radians(hp * 60)
             b.dx = -math.cos(angle) * b.spd
             b.dy = math.sin(angle) * b.spd
@@ -860,7 +858,6 @@ class Game:
                 winner = "PLAYER 2" if self.mode == "pvp" else "NEURAL AI"
                 col = PINK
 
-            # Big particle burst
             for _ in range(3):
                 spawn_particles(self.particles, W // 2, H // 2, col, 20)
 
@@ -999,7 +996,7 @@ class Game:
             elif self.state == "gameover":
                 self.go_screen.update(dt)
             elif self.state == "game_win":
-                pass  # updated inside handle_events → update()
+                pass 
             else:
                 self.update(dt)
 
