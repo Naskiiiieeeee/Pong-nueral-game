@@ -59,7 +59,7 @@ def save_lb(entries):
 
 
 # ─────────────────────────────────────────────
-#  SOUND
+#  SOUND  (tiny synthesiser via pygame.sndarray)
 # ─────────────────────────────────────────────
 def make_beep(freq=440, duration=0.05, waveform="square", volume=0.25, sample_rate=22050):
     """Return a pygame.Sound object for a simple synthesised tone."""
@@ -305,7 +305,7 @@ class MenuScreen:
         glow = abs(math.sin(self.pulse_t * 1.2))
         col  = (int(0 + glow * 0), int(200 + glow * 55), int(200 + glow * 55))
         self.R.glow_text("PONG", self.R.font_title, col, W // 2, 90, glow_r=max(4, int(glow * 18)))
-        self.R.text("// NEURAL CLASH //", self.R.font_xs, (0, 130, 130), W // 2, 148)
+        self.R.text("//NEURAL CLASH//", self.R.font_xs, (0, 130, 130), W // 2, 148)
 
         # divider
         pygame.draw.line(self.R.screen, (0, 120, 120), (W // 2 - 110, 165), (W // 2 + 110, 165))
@@ -520,11 +520,10 @@ class Game:
 
         self.countdown_val = 0
         self.countdown_timer = 0.0
-        self.countdown_phase = "number"
+        self.countdown_phase = "number"  
 
         self.keys = {}
-
-    # ── start ──────────────────────────────────────────────────────
+        self._last_mouse_y = -1
     def start_game(self):
         self.mode       = self.menu_screen.mode
         self.difficulty = self.menu_screen.difficulty
@@ -805,9 +804,12 @@ class Game:
                     elif action == "menu":
                         self.state = "menu"
 
+        # mouse control (VS AI only)
         if self.state == "playing" and self.mode == "ai":
             mx, my = pygame.mouse.get_pos()
-            pass 
+            if my != self._last_mouse_y:
+                self.player.y = clamp(my - PH / 2, 0, H - PH)
+                self._last_mouse_y = my
 
         return True
 

@@ -4,6 +4,60 @@
     "p1": 0,
     "p2": 7,
     "mode": "VS AI",
+    "diff": "HARD",
+    "rallies": 109,
+    "date": "May 16 19:49"
+  },
+  {
+    "winner": "NEURAL AI",
+    "p1": 0,
+    "p2": 7,
+    "mode": "VS AI",
+    "diff": "HARD",
+    "rallies": 225,
+    "date": "May 16 19:46"
+  },
+  {
+    "winner": "NEURAL AI",
+    "p1": 0,
+    "p2": 7,
+    "mode": "VS AI",
+    "diff": "HARD",
+    "rallies": 85,
+    "date": "May 16 19:41"
+  },
+  {
+    "winner": "NEURAL AI",
+    "p1": 0,
+    "p2": 7,
+    "mode": "VS AI",
+    "diff": "EASY",
+    "rallies": 151,
+    "date": "May 16 19:38"
+  },
+  {
+    "winner": "NEURAL AI",
+    "p1": 0,
+    "p2": 7,
+    "mode": "VS AI",
+    "diff": "HARD",
+    "rallies": 101,
+    "date": "May 16 19:32"
+  },
+  {
+    "winner": "PLAYER 2",
+    "p1": 1,
+    "p2": 7,
+    "mode": "PVP",
+    "diff": "\u2014",
+    "rallies": 1,
+    "date": "May 16 19:29"
+  },
+  {
+    "winner": "NEURAL AI",
+    "p1": 0,
+    "p2": 7,
+    "mode": "VS AI",
     "diff": "MEDIUM",
     "rallies": 35,
     "date": "May 16 19:04"
