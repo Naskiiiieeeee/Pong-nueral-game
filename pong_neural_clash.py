@@ -60,6 +60,150 @@ def save_lb(entries):
 
 
 # ─────────────────────────────────────────────
+#  LOADING SCREEN
+# ─────────────────────────────────────────────
+BOOT_STEPS = [
+    (0.08,  "INITIALIZING NEURAL ENGINE..."),
+    (0.18,  "LOADING PHYSICS MODULE..."),
+    (0.30,  "CALIBRATING AI REFLEXES..."),
+    (0.44,  "COMPILING PARTICLE SYSTEM..."),
+    (0.57,  "SYNCING LEADERBOARD DATA..."),
+    (0.70,  "WARMING UP RENDERER..."),
+    (0.82,  "ARMING PADDLE CONTROLLERS..."),
+    (0.92,  "RUNNING SELF-DIAGNOSTICS..."),
+    (1.00,  "SYSTEM READY // NEURAL CLASH ONLINE"),
+]
+
+def run_loading_screen(screen, clock):
+    """Blocking loading screen. Returns when animation finishes."""
+    pygame.font.init()
+    font_title = None
+    font_med   = None
+    font_sm    = None
+    for name in ("Orbitron", "Share Tech Mono", "Courier New", "monospace"):
+        try:
+            font_title = pygame.font.SysFont(name, 64, bold=True)
+            font_med   = pygame.font.SysFont(name, 18, bold=True)
+            font_sm    = pygame.font.SysFont(name, 13)
+            break
+        except Exception:
+            pass
+    if font_title is None:
+        font_title = pygame.font.Font(None, 64)
+        font_med   = pygame.font.Font(None, 22)
+        font_sm    = pygame.font.Font(None, 16)
+
+    DURATION   = 2.8   # seconds total
+    elapsed    = 0.0
+    glitch_t   = 0.0
+    glitch_chars = "!@#$%^&*<>/\\|~█▓▒░"
+
+    def draw_bg_grid(surf):
+        surf.fill((0, 3, 18))
+        for x in range(0, W, 40):
+            pygame.draw.line(surf, (0, 14, 22), (x, 0), (x, H))
+        for y in range(0, H, 40):
+            pygame.draw.line(surf, (0, 14, 22), (0, y), (W, y))
+        pygame.draw.line(surf, CYAN, (0, 1),    (W, 1),    2)
+        pygame.draw.line(surf, CYAN, (0, H-2),  (W, H-2),  2)
+
+    def glitch_text(text, t, intensity=0.18):
+        if random.random() > intensity:
+            return text
+        out = list(text)
+        for i in random.sample(range(len(out)), max(1, int(len(out) * 0.12))):
+            if out[i] != " ":
+                out[i] = random.choice(glitch_chars)
+        return "".join(out)
+
+    running = True
+    while running:
+        dt = clock.tick(FPS) / 1000.0
+        elapsed  += dt
+        glitch_t += dt
+        progress  = min(elapsed / DURATION, 1.0)
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if elapsed > 0.5:
+                if event.type == pygame.KEYDOWN or (
+                        event.type == pygame.MOUSEBUTTONDOWN):
+                    running = False
+
+        draw_bg_grid(screen)
+
+        # ── title with glow ──────────────────────────────────────
+        title_alpha = min(255, int(progress * 3.5 * 255))
+        glow_col = (0, int(180 * progress), int(220 * progress))
+        title_str = glitch_text("PONG", glitch_t, intensity=max(0, 0.5 - progress * 0.6))
+        title_surf = font_title.render(title_str, True, (0, 230, 230))
+        title_surf.set_alpha(title_alpha)
+        screen.blit(title_surf, title_surf.get_rect(center=(W // 2, 155)))
+
+        sub_surf = font_sm.render("// NEURAL CLASH //", True, (0, 130, 140))
+        sub_surf.set_alpha(min(255, int((progress - 0.1) * 4 * 255)))
+        screen.blit(sub_surf, sub_surf.get_rect(center=(W // 2, 208)))
+
+        # ── scanline overlay ─────────────────────────────────────
+        scan_surf = pygame.Surface((W, H), pygame.SRCALPHA)
+        for y in range(0, H, 4):
+            pygame.draw.line(scan_surf, (0, 0, 0, 28), (0, y), (W, y))
+        screen.blit(scan_surf, (0, 0))
+
+        # ── boot log lines ───────────────────────────────────────
+        log_x  = W // 2 - 220
+        log_y0 = 270
+        visible_steps = [s for s in BOOT_STEPS if progress >= s[0]]
+        for idx, (_, msg) in enumerate(visible_steps[-6:]):   # show last 6
+            y = log_y0 + idx * 18
+            is_last = (idx == len(visible_steps[-6:]) - 1)
+            col = CYAN if is_last else (0, 100, 110)
+            disp = glitch_text(msg, glitch_t, 0.25) if is_last else msg
+            prefix = "> " if is_last else "  "
+            line_surf = font_sm.render(prefix + disp, True, col)
+            screen.blit(line_surf, (log_x, y))
+
+        # ── progress bar ─────────────────────────────────────────
+        bar_w  = 420
+        bar_h  = 14
+        bar_x  = W // 2 - bar_w // 2
+        bar_y  = 400
+        filled = int(bar_w * progress)
+
+        pygame.draw.rect(screen, (0, 30, 45),  (bar_x, bar_y, bar_w, bar_h), border_radius=3)
+        pygame.draw.rect(screen, (0, 60, 80),  (bar_x, bar_y, bar_w, bar_h), 1, border_radius=3)
+
+        if filled > 0:
+            pygame.draw.rect(screen, (0, 180, 200), (bar_x, bar_y, filled, bar_h), border_radius=3)
+            edge_x = bar_x + filled - 4
+            if edge_x > bar_x:
+                pygame.draw.rect(screen, CYAN, (edge_x, bar_y, 4, bar_h), border_radius=2)
+
+        pct_surf = font_sm.render(f"{int(progress * 100):3d}%", True, (0, 160, 170))
+        screen.blit(pct_surf, (bar_x + bar_w + 10, bar_y))
+
+        # ── skip hint ────────────────────────────────────────────
+        if elapsed > 0.5:
+            hint_alpha = min(180, int((elapsed - 0.5) * 300))
+            hint_surf = font_sm.render("PRESS ANY KEY TO SKIP", True, (0, 70, 80))
+            hint_surf.set_alpha(hint_alpha)
+            screen.blit(hint_surf, hint_surf.get_rect(center=(W // 2, H - 28)))
+
+        # ── corner brackets ──────────────────────────────────────
+        bc, sz = (0, 160, 160), 18
+        for px, py, dx, dy in [(4,4,1,1),(W-4,4,-1,1),(4,H-4,1,-1),(W-4,H-4,-1,-1)]:
+            pygame.draw.line(screen, bc, (px, py), (px + dx * sz, py), 2)
+            pygame.draw.line(screen, bc, (px, py), (px, py + dy * sz), 2)
+
+        pygame.display.flip()
+
+        if progress >= 1.0 and elapsed > DURATION + 0.3:
+            running = False
+
+
+# ─────────────────────────────────────────────
 #  SOUND
 # ─────────────────────────────────────────────
 def make_beep(freq=440, duration=0.05, waveform="square", volume=0.25, sample_rate=22050):
@@ -431,9 +575,9 @@ class LeaderboardScreen:
                     e.get("games", "?"),             
                     score_str,                       
                     str(total_games),                
-                    e.get("mode", "?"),             
+                    e.get("mode", "?"),              
                     e.get("diff", "—"),              
-                    e.get("date", "?"),              
+                    e.get("date", "?"),             
                 ]
                 for val, rx in zip(row, xs):
                     color = CYAN if i == 0 else (0, 160, 160)
@@ -608,6 +752,10 @@ class Game:
         pygame.display.set_caption("PONG // NEURAL CLASH  |  BEST OF 3")
         self.screen   = pygame.display.set_mode((W, H))
         self.clock    = pygame.time.Clock()
+
+        # ── loading screen  ────────────
+        run_loading_screen(self.screen, self.clock)
+
         self.renderer = Renderer(self.screen)
         self.sfx      = SFX()
 
@@ -699,8 +847,8 @@ class Game:
 
         entry = {
             "winner":      winner,
-            "games":       f"{self.p_wins}–{self.a_wins}",   
-            "score":       score_str,                         
+            "games":       f"{self.p_wins}–{self.a_wins}",  
+            "score":       score_str,                        
             "total_games": self.total_games,                  
             "mode":        "PVP" if self.mode == "pvp" else "VS AI",
             "diff":        "—" if self.mode == "pvp" else self.difficulty.upper(),  
