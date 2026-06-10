@@ -1,6 +1,46 @@
 [
   {
     "winner": "NEURAL AI",
+    "games": "0\u20132",
+    "score": "1-7, 0-7",
+    "total_games": 2,
+    "mode": "VS AI",
+    "diff": "HARD",
+    "rallies": 182,
+    "date": "Jun 10 15:34"
+  },
+  {
+    "winner": "NEURAL AI",
+    "games": "0\u20132",
+    "score": "0-7, 0-7",
+    "total_games": 2,
+    "mode": "VS AI",
+    "diff": "MEDIUM",
+    "rallies": 11,
+    "date": "Jun 10 15:30"
+  },
+  {
+    "winner": "NEURAL AI",
+    "games": "0\u20132",
+    "score": "0-7, 0-7",
+    "total_games": 2,
+    "mode": "VS AI",
+    "diff": "EASY",
+    "rallies": 10,
+    "date": "Jun 10 15:28"
+  },
+  {
+    "winner": "NEURAL AI",
+    "p1": 0,
+    "p2": 7,
+    "games": "0\u20132",
+    "mode": "VS AI",
+    "diff": "MEDIUM",
+    "rallies": 11,
+    "date": "May 17 11:49"
+  },
+  {
+    "winner": "NEURAL AI",
     "p1": 0,
     "p2": 7,
     "games": "0\u20132",
