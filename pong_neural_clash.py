@@ -265,11 +265,9 @@ class Renderer:
             px = start_x + i * spacing
             filled = i < wins
             c = color if filled else (30, 60, 70)
-            # small rotated square (diamond)
             pts = [(px, cy - 5), (px + 5, cy), (px, cy + 5), (px - 5, cy)]
             if filled:
                 pygame.draw.polygon(self.screen, c, pts)
-                # glow
                 gs = pygame.Surface((20, 20), pygame.SRCALPHA)
                 pygame.draw.polygon(gs, (*c, 60),
                     [(10, 3), (17, 10), (10, 17), (3, 10)])
@@ -396,54 +394,64 @@ class MenuScreen:
         return None
 
 
+# ─────────────────────────────────────────────
+#   correct xs, total games column added
+# ─────────────────────────────────────────────
 class LeaderboardScreen:
     def __init__(self, renderer):
         self.R = renderer
 
     def draw(self, entries):
         self.R.draw_bg()
-        self.R.glow_text("LEADERBOARD", self.R.font_med, CYAN, W // 2, 50)
-        self.R.text("// MATCH HISTORY — BEST OF 3 GAMES //", self.R.font_xs, (0, 130, 130), W // 2, 80)
+        self.R.glow_text("LEADERBOARD", self.R.font_med, CYAN, W // 2, 42)
+        self.R.text("// MATCH HISTORY — BEST OF 3 GAMES //", self.R.font_xs, (0, 130, 130), W // 2, 72)
 
-        headers = ["#", "WINNER", "SCORE", "GAMES", "MODE", "DIFF", "DATE"]
-        xs      = [35, 95, 220, 330, 420, 510, 600]
-        pygame.draw.line(self.R.screen, (0, 100, 110), (30, 105), (W - 30, 105))
+        headers = ["#",  "WINNER",  "MATCH",  "SCORE",    "TOTAL", "MODE", "DIFF",  "DATE"      ]
+        xs      = [22,   80,        190,       310,         405,     470,    535,     650         ]
+
+        pygame.draw.line(self.R.screen, (0, 100, 110), (14, 97), (W - 14, 97))
         for hdr, hx in zip(headers, xs):
-            self.R.text(hdr, self.R.font_xs, (0, 160, 160), hx, 95)
+            self.R.text(hdr, self.R.font_xs, (0, 180, 180), hx, 88)
 
         if not entries:
             self.R.text("NO MATCHES YET — PLAY A GAME FIRST",
                         self.R.font_xs, (0, 120, 130), W // 2, 280)
         else:
             for i, e in enumerate(entries[:20]):
-                y = 125 + i * 20
+                y = 113 + i * 20
                 if y > H - 80: break
+
+                score_str = e.get("score", f"{e.get('p1','?')}–{e.get('p2','?')}")
+
+                total_games = e.get("total_games", "?")
+
                 row = [
                     f"{i+1:02d}",
-                    e.get("winner","?"),
-                    f"{e['p1']} — {e['p2']}",
-                    e.get("games","?"),
-                    e.get("mode","?"),
-                    e.get("diff","—"),
-                    e.get("date","?"),
+                    e.get("winner", "?"),           
+                    e.get("games", "?"),             
+                    score_str,                       
+                    str(total_games),                
+                    e.get("mode", "?"),             
+                    e.get("diff", "—"),              
+                    e.get("date", "?"),              
                 ]
                 for val, rx in zip(row, xs):
                     color = CYAN if i == 0 else (0, 160, 160)
                     self.R.text(val, self.R.font_xs, color, rx, y)
 
-        pygame.draw.rect(self.R.screen, (0, 30, 50), (W // 2 - 80, H - 60, 160, 34), border_radius=3)
-        pygame.draw.rect(self.R.screen, CYAN, (W // 2 - 80, H - 60, 160, 34), 1, border_radius=3)
-        self.R.text("BACK", self.R.font_xs, CYAN, W // 2, H - 43)
+        pygame.draw.rect(self.R.screen, (0, 30, 50), (W // 2 - 80, H - 52, 160, 34), border_radius=3)
+        pygame.draw.rect(self.R.screen, CYAN, (W // 2 - 80, H - 52, 160, 34), 1, border_radius=3)
+        self.R.text("BACK", self.R.font_xs, CYAN, W // 2, H - 35)
 
     def handle_click(self, pos):
         mx, my = pos
-        if W // 2 - 80 <= mx <= W // 2 + 80 and H - 60 <= my <= H - 26:
+        if W // 2 - 80 <= mx <= W // 2 + 80 and H - 52 <= my <= H - 18:
             return "back"
         return None
 
 
 # ─────────────────────────────────────────────
-#  GAME-WIN SCREEN  (between games in a match)
+#  GAME-WIN SCREEN
 # ─────────────────────────────────────────────
 class GameWinScreen:
     """Shown after each individual game (not the whole match)."""
@@ -475,7 +483,6 @@ class GameWinScreen:
     def draw(self):
         self.R.draw_bg()
 
-        # "GAME X COMPLETE"
         total = self.p_wins + self.a_wins
         self.R.text(f"// GAME {total} COMPLETE //", self.R.font_xs, (0, 130, 130), W // 2, 90)
 
@@ -484,21 +491,17 @@ class GameWinScreen:
         self.R.glow_text(f"{self.winner}", self.R.font_title, gc, W // 2, 180, glow_r=int(6 + glow * 16))
         self.R.text("WINS THIS GAME", self.R.font_med, self.color, W // 2, 240)
 
-        # point score for this game
         self.R.text(f"{self.p_score:02d}  —  {self.a_score:02d}", self.R.font_score, (0, 200, 200), W // 2, 290)
 
         pygame.draw.line(self.R.screen, (0, 120, 120), (W // 2 - 130, 325), (W // 2 + 130, 325))
 
-        # match score (game wins)
         p2_lbl = "PLAYER 2" if self.mode == "pvp" else "NEURAL AI"
         self.R.text("MATCH SCORE", self.R.font_xs, (0, 150, 150), W // 2, 345)
         self.R.text(f"PLAYER 1    {self.p_wins} — {self.a_wins}    {p2_lbl}",
                     self.R.font_med, CYAN, W // 2, 368)
 
-        # pip display
         self._draw_match_pips()
 
-        # continue button
         pygame.draw.rect(self.R.screen, (0, 40, 60), (W // 2 - 130, 440, 260, 46), border_radius=4)
         pygame.draw.rect(self.R.screen, CYAN, (W // 2 - 130, 440, 260, 46), 1, border_radius=4)
         self.R.text("NEXT GAME ▶", self.R.font_med, CYAN, W // 2, 463)
@@ -506,7 +509,6 @@ class GameWinScreen:
         self.R.text("ESC = MAIN MENU", self.R.font_xs, (0, 80, 90), W // 2, H - 16)
 
     def _draw_match_pips(self):
-        """Draw big match-win pips for both sides."""
         cy = 408
         spacing = 28
         for i in range(WINS_TO_MATCH):
@@ -563,11 +565,8 @@ class GameOverScreen:
         self.R.glow_text("THE MATCH", self.R.font_med, (0, 180, 180), W // 2, 120)
         self.R.glow_text(winner_txt, self.R.font_title, gc, W // 2, 185, glow_r=int(6 + glow * 16))
 
-        # match game score
         p2_lbl = "PLAYER 2" if mode == "pvp" else "NEURAL AI"
         self.R.text(f"PLAYER 1  {p_wins} — {a_wins}  {p2_lbl}", self.R.font_med, (0, 200, 200), W // 2, 255)
-
-        # last game point score
         self.R.text(f"last game: {p_score} — {a_score}", self.R.font_xs, (0, 120, 130), W // 2, 285)
 
         pygame.draw.line(self.R.screen, (0, 120, 120), (W // 2 - 110, 305), (W // 2 + 110, 305))
@@ -578,7 +577,6 @@ class GameOverScreen:
             info = f"TOTAL RALLIES: {rallies}"
         self.R.text(info, self.R.font_xs, (0, 140, 140), W // 2, 322)
 
-        # buttons
         btns = [("REMATCH", W // 2 - 210, 345), ("LEADERBOARD", W // 2 - 50, 345), ("MAIN MENU", W // 2 + 110, 345)]
         for lbl, bx, by in btns:
             w = 140
@@ -621,16 +619,18 @@ class Game:
         self.state   = "menu"
         self.lb_from = "menu"
 
-        # match-level vars
         self.mode       = "ai"
         self.difficulty = "medium"
-        self.p_wins     = 0   
+        self.p_wins     = 0
         self.a_wins     = 0
         self.total_rallies = 0
         self.ai_bonus      = 0.0
         self.p_score = 0
         self.a_score = 0
         self.rallies = 0
+
+        self.game_scores = []   
+        self.total_games = 0   
 
         self.player    = Paddle(PM)
         self.ai_p      = Paddle(W - PM - PW)
@@ -646,7 +646,6 @@ class Game:
 
     # ── match / game start ─────────────────────────────────────────
     def start_match(self):
-        """Called when starting a brand-new match from menu / rematch."""
         self.mode          = self.menu_screen.mode
         self.difficulty    = self.menu_screen.difficulty
         self.p_wins        = 0
@@ -654,10 +653,11 @@ class Game:
         self.total_rallies = 0
         self.ai_bonus      = 0.0
         self.particles     = []
+        self.game_scores   = []   
+        self.total_games   = 0    
         self._start_game()
 
     def _start_game(self):
-        """Reset per-game state and begin countdown."""
         self.p_score = 0
         self.a_score = 0
         self.rallies = 0
@@ -683,21 +683,29 @@ class Game:
 
     # ── leaderboard ────────────────────────────────────────────────
     def record_match(self):
+        """
+        FIX 1: difficulty is already locked in self.difficulty at start_match().
+        FIX 2: build a readable per-game score string from self.game_scores.
+        FIX 3: save self.total_games so leaderboard can display it.
+        """
         if self.p_wins > self.a_wins:
             winner = "PLAYER 1"
         elif self.a_wins > self.p_wins:
             winner = "PLAYER 2" if self.mode == "pvp" else "NEURAL AI"
         else:
             winner = "DRAW"
+
+        score_str = ", ".join(f"{ps}-{as_}" for ps, as_ in self.game_scores)
+
         entry = {
-            "winner": winner,
-            "p1": self.p_score,
-            "p2": self.a_score,
-            "games": f"{self.p_wins}–{self.a_wins}",
-            "mode": "PVP" if self.mode == "pvp" else "VS AI",
-            "diff": "—" if self.mode == "pvp" else self.difficulty.upper(),
-            "rallies": self.total_rallies,
-            "date": datetime.now().strftime("%b %d %H:%M"),
+            "winner":      winner,
+            "games":       f"{self.p_wins}–{self.a_wins}",   
+            "score":       score_str,                         
+            "total_games": self.total_games,                  
+            "mode":        "PVP" if self.mode == "pvp" else "VS AI",
+            "diff":        "—" if self.mode == "pvp" else self.difficulty.upper(),  
+            "rallies":     self.total_rallies,
+            "date":        datetime.now().strftime("%b %d %H:%M"),
         }
         lb = load_lb()
         lb.insert(0, entry)
@@ -842,7 +850,6 @@ class Game:
                 self.ai_p.y   = H / 2 - PH / 2
                 self.short_countdown()
 
-        # particles
         for p in self.particles:
             p.update()
         self.particles = [p for p in self.particles if p.life > 0]
@@ -857,6 +864,9 @@ class Game:
                 self.a_wins += 1
                 winner = "PLAYER 2" if self.mode == "pvp" else "NEURAL AI"
                 col = PINK
+
+            self.game_scores.append((self.p_score, self.a_score))
+            self.total_games += 1
 
             for _ in range(3):
                 spawn_particles(self.particles, W // 2, H // 2, col, 20)
@@ -975,7 +985,6 @@ class Game:
                     elif action == "menu":
                         self.state = "menu"
 
-        # mouse control (VS AI only)
         if self.state == "playing" and self.mode == "ai":
             mx, my = pygame.mouse.get_pos()
             if my != self._last_mouse_y:
@@ -996,7 +1005,7 @@ class Game:
             elif self.state == "gameover":
                 self.go_screen.update(dt)
             elif self.state == "game_win":
-                pass 
+                pass
             else:
                 self.update(dt)
 
