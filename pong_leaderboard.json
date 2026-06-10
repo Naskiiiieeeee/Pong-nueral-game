@@ -1,5 +1,15 @@
 [
   {
+    "winner": "PLAYER 2",
+    "games": "1\u20132",
+    "score": "7-3, 4-7, 0-7",
+    "total_games": 3,
+    "mode": "PVP",
+    "diff": "\u2014",
+    "rallies": 19,
+    "date": "Jun 10 15:47"
+  },
+  {
     "winner": "NEURAL AI",
     "games": "0\u20132",
     "score": "1-7, 0-7",
